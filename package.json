@@ -1,5 +1,5 @@
 {
-  "name": "astro-sanity-starter",
+  "name": "sf-astro-starter",
   "description": "Astro (SSG + tryb podglądu z Visual Editing) i Sanity Studio",
   "private": true,
   "type": "module",

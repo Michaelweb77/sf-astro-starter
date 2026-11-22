@@ -1,4 +1,4 @@
-# Astro + Sanity Starter
+# SF Astro Starter
 
 Starter na bazie [sanity-template-astro-clean](https://github.com/sanity-io/sanity-template-astro-clean), przebudowany według kursu Astro:
 
@@ -21,7 +21,7 @@ Strony nie wiedzą, w którym trybie działają. Decyduje o tym `frontend/src/ut
 ## Start
 
 ```shell
-npm create sanity@latest -- --template <github-user>/astro-sanity-starter
+npm create sanity@latest -- --template Michaelweb77/sf-astro-starter
 ```
 
 CLI zaloguje Cię do Sanity, założy projekt i dataset, a ID wpisze do `frontend/.env` i `studio/.env`.
