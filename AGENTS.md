@@ -42,3 +42,7 @@ Dodając typ treści: schemat w Studio → zapytanie i `toX()` w `queries.ts` �
 - `frontend/src/components/LayoutGrid.astro`: nakładka siatki kolumn (tylko dev, `Shift + G`), propsy `columns`, `columnsMd`, `columnsSm`, `gap`, `color`, `visible`, `enabled`. Szerokość z `.container`.
 - zmienne z Webflow: `responsive.scss` (padding, kontenery, `--text--*`), `colors.scss` (paleta `--colors--*`, role `--themes--*` + `.theme-invert`, fonty `--font-family--*`),
 - `text-style.scss`: mapa `$text-styles` generuje style `h1`–`h6` (+ `.text-style-h1`…), `.text-tiny`…`.text-large`, `.display1/2`, `body` = text-regular. Nowy styl / zmiana wagi = wpis w mapie.
+
+## Szablon npm create sanity
+
+Walidator CLI (`@sanity/template-validator`) odrzuca `.env.example`, jeśli gdziekolwiek w pliku, także w komentarzu, występuje wzorzec `\w+\s+=` (słowo, spacja, znak równości). Pliki `.env.example` muszą też zawierać `SANITY(_STUDIO)_PROJECT_ID` i `SANITY(_STUDIO)_DATASET`.
