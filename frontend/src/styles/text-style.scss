@@ -1,0 +1,160 @@
+@use "sass:list";
+@use "sass:map";
+
+// Style tekstu (Webflow: Variables -> Text style).
+//
+// Jak to dziala:
+// 1. Kazdy styl (text-small, h1, display1...) ustawia tylko swoje ZMIENNE (--text-style-size itd.).
+// 2. Jedna wspolna regula zamienia te zmienne na wlasciwosci CSS.
+// Efekt jak w Webflow, ale ustawienia stylow edytujesz w jednym miejscu: mapie $text-styles.
+//
+// Uzycie w HTML:  <h2>, <p class="text-large">, <p class="text-style-h3"> (wyglad h3 bez znacznika h3)
+
+/* =========================
+   Ustawienia
+   ========================= */
+
+// Wartosci, ktore dostaje kazdy styl, jesli nie nadpisze ich w mapie ponizej
+$text-style-defaults: (
+  family: var(--font-family--body),
+  line-height: 1.5,
+  weight: 400,
+  letter-spacing: 0em,
+);
+
+// Kolejne style. size jest wymagany, reszta opcjonalna (family, line-height, weight, letter-spacing).
+$text-styles: (
+  text-tiny: (
+    size: var(--text--text-tiny),
+  ),
+  text-small: (
+    size: var(--text--text-small),
+  ),
+  text-regular: (
+    size: var(--text--text-regular),
+  ),
+  text-medium: (
+    size: var(--text--text-medium),
+  ),
+  text-large: (
+    size: var(--text--text-large),
+  ),
+  h1: (
+    size: var(--text--h1),
+    family: var(--font-family--heading),
+  ),
+  h2: (
+    size: var(--text--h2),
+    family: var(--font-family--heading),
+  ),
+  h3: (
+    size: var(--text--h3),
+    family: var(--font-family--heading),
+  ),
+  h4: (
+    size: var(--text--h4),
+    family: var(--font-family--heading),
+  ),
+  h5: (
+    size: var(--text--h5),
+    family: var(--font-family--heading),
+  ),
+  h6: (
+    size: var(--text--h6),
+    family: var(--font-family--heading),
+  ),
+  display1: (
+    size: var(--text--display1),
+    family: var(--font-family--heading),
+  ),
+  display2: (
+    size: var(--text--display2),
+    family: var(--font-family--heading),
+  ),
+);
+
+/* =========================
+   Generowanie (zwykle nie trzeba tu nic zmieniac)
+   ========================= */
+
+$_headings: (h1, h2, h3, h4, h5, h6);
+
+// Ktore selektory dostaje dany styl
+@function _text-style-selector($name) {
+  // h1 -> znacznik <h1> i klasa .text-style-h1
+  @if list.index($_headings, $name) {
+    @return "#{$name}, .text-style-#{$name}";
+  }
+
+  // text-regular to styl bazowy strony (body), jak "Body / text-regular" w Webflow
+  @if $name == text-regular {
+    @return "body, .text-regular";
+  }
+
+  @return ".#{$name}";
+}
+
+// Wspolna regula: zmienne -> wlasciwosci. Kolor z motywu, wiec .theme-invert dziala tez na naglowki.
+%text-style {
+  font-family: var(--text-style-family);
+  font-size: var(--text-style-size);
+  line-height: var(--text-style-line-height);
+  font-weight: var(--text-style-weight);
+  letter-spacing: var(--text-style-letter-spacing);
+  color: var(--themes--text);
+}
+
+// Kazdy styl ustawia wszystkie zmienne (domyslne + swoje), zeby nie dziedziczyl ich po rodzicu.
+// Np. .text-small wewnatrz h1 nie przejmie wagi ani interlinii naglowka.
+@each $name, $style in $text-styles {
+  $s: map.merge($text-style-defaults, $style);
+
+  #{_text-style-selector($name)} {
+    @extend %text-style;
+    --text-style-family: #{map.get($s, family)};
+    --text-style-size: #{map.get($s, size)};
+    --text-style-line-height: #{map.get($s, line-height)};
+    --text-style-weight: #{map.get($s, weight)};
+    --text-style-letter-spacing: #{map.get($s, letter-spacing)};
+  }
+}
+
+body {
+  background-color: var(--themes--background);
+}
+
+/* =========================
+   Klasy pomocnicze tekstu (jak w SF-STARTER)
+   ========================= */
+
+// .text-weight-300 ... .text-weight-900
+@each $weight in (300, 400, 500, 600, 700, 800, 900) {
+  .text-weight-#{$weight} {
+    font-weight: $weight;
+  }
+}
+
+// .text-align-left / center / right
+@each $align in (left, center, right) {
+  .text-align-#{$align} {
+    text-align: $align;
+  }
+}
+
+// .text-uppercase / lowercase / capitalize
+@each $transform in (uppercase, lowercase, capitalize) {
+  .text-#{$transform} {
+    text-transform: $transform;
+  }
+}
+
+// .text-wrap-balance / pretty / nowrap
+@each $wrap in (balance, pretty, nowrap) {
+  .text-wrap-#{$wrap} {
+    text-wrap: $wrap;
+  }
+}
+
+.text-style-italic {
+  font-style: italic;
+}

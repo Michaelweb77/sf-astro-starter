@@ -1,0 +1,85 @@
+// Reset na bazie SF-STARTER (Specta) - bez regul specyficznych dla Webflow (.w-*).
+// Typografia i kolory sa w global.scss, nie tutaj.
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%; // 1rem = 10px, a powiekszanie fontu w przegladarce dalej dziala
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  // Na bardzo duzych ekranach skala rosnie plynnie
+  @media screen and (min-width: 1921px) {
+    font-size: calc(31.25% + 0.4vw);
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// Media: blokowe i nie szersze niz rodzic.
+// Specta daje img { width: 100%; height: 100% }, ale przy <Image> z Astro (wymiary w HTML)
+// i malych obrazkach (logo, ikony) bezpieczniej jest max-width + height: auto.
+img,
+picture,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+img {
+  object-fit: cover;
+}
+
+video {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// Punkt odniesienia dla elementow position: absolute (np. tla, nakladki, sceny WebGL)
+section,
+header,
+footer {
+  position: relative;
+}
+
+// Pola formularzy dziedzicza font i kolor (przegladarki daja im wlasne, mniejsze)
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+// Kolor linkow z rodzica. Podkreslenie zostaje domyslne (linki w tresci z CMS maja byc widoczne)
+a {
+  color: inherit;
+}
+
+ul,
+ol {
+  list-style: none;
+}

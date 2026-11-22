@@ -1,0 +1,36 @@
+---
+// Renderowany tylko w trybie podgladu (Layout: {isPreview && <VisualEditing />}).
+// Astro dolacza skrypt komponentu tylko tam, gdzie komponent sie wyrenderowal,
+// wiec w produkcji (SSG) ten kod w ogole nie trafia do przegladarki.
+---
+
+<script>
+  import "@sanity/visual-editing-standalone/styles.css";
+  import { enableVisualEditing } from "@sanity/visual-editing-standalone";
+  import { navigate } from "astro:transitions/client";
+
+  // Skrypt modulowy wykonuje sie raz na dokument, a ClientRouter dokumentu nie wymienia,
+  // wiec nakladki zyja przez cala sesje i same widza nowe elementy po nawigacji.
+  enableVisualEditing({
+    // Presentation tool steruje adresem podgladu, a my mowimy mu, gdzie jestesmy
+    history: {
+      subscribe: (onNavigate) => {
+        const handlePageLoad = () => {
+          onNavigate({ type: "push", url: `${location.pathname}${location.search}` });
+        };
+
+        document.addEventListener("astro:page-load", handlePageLoad);
+        return () => document.removeEventListener("astro:page-load", handlePageLoad);
+      },
+      update: (update) => {
+        if (update.type === "push" || update.type === "replace") {
+          navigate(update.url, { history: update.type });
+        }
+
+        if (update.type === "pop") history.back();
+      },
+    },
+    // Zmiana w Studio -> pobieramy biezaca strone od nowa (SSR, wersje robocze), bez przeladowania
+    refresh: () => navigate(`${location.pathname}${location.search}`, { history: "replace" }),
+  });
+</script>

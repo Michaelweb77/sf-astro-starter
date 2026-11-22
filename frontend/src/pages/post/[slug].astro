@@ -1,0 +1,105 @@
+---
+import { Image } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import RichText from "@/components/RichText.astro";
+import { getPost, getPosts } from "@/utils/posts";
+import type { Post } from "@/utils/schemas";
+import { sanityAttr } from "@/utils/visual-editing";
+
+// Produkcja (SSG): Astro wywoluje getStaticPaths i podaje post w propsach.
+// Podglad (SSR): getStaticPaths jest pomijane, wiec post pobieramy po slugu przy kazdym zadaniu.
+export async function getStaticPaths() {
+  const posts = await getPosts();
+
+  return posts.map((el) => ({
+    params: { slug: el.slug },
+    props: { post: el },
+  }));
+}
+
+interface Props {
+  post?: Post;
+}
+
+const post = Astro.props.post ?? (await getPost(Astro.params.slug ?? ""));
+
+if (!post) {
+  return Astro.rewrite("/404");
+}
+
+const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "long" });
+---
+
+<Layout
+  title={post.seo.title ?? post.title}
+  description={post.seo.description}
+  image={post.seo.image}
+>
+  <article class="post container">
+    <header class="post_header">
+      <time class="post_date" datetime={post.publishedAt.toISOString()}>
+        {dateFormatter.format(post.publishedAt)}
+      </time>
+      <h1>{post.title}</h1>
+      {post.excerpt && <p class="post_excerpt">{post.excerpt}</p>}
+    </header>
+
+    {
+      post.mainImage && (
+        <div
+          class="post_cover"
+          transition:name={`post-${post.slug}`}
+          data-sanity={sanityAttr(post, "mainImage")}
+        >
+          <Image
+            src={post.mainImage.src}
+            alt={post.mainImage.alt}
+            width={post.mainImage.width}
+            height={post.mainImage.height}
+            layout="full-width"
+            priority
+          />
+        </div>
+      )
+    }
+
+    <RichText value={post.body} data-sanity={sanityAttr(post, "body")} />
+  </article>
+</Layout>
+
+<style lang="scss">
+  .post {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-xl);
+  }
+
+  .post_header {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--content-max);
+  }
+
+  .post_date {
+    font-size: var(--font-size-s);
+    color: var(--color-text-subtle);
+  }
+
+  h1 {
+    font-size: var(--font-size-xxl);
+  }
+
+  .post_excerpt {
+    font-size: var(--font-size-l);
+    color: var(--color-text-muted);
+  }
+
+  .post_cover {
+    overflow: hidden;
+    border-radius: var(--radius-m);
+  }
+
+  .post_cover :global(img) {
+    width: 100%;
+  }
+</style>

@@ -1,0 +1,137 @@
+---
+// Nakladka z siatka kolumn do pracy nad layoutem (wzorowana na layout_grid z SF/Specta).
+// Szerokosc bierze z klasy .container, wiec kolumny pokrywaja sie dokladnie z trescia strony.
+//
+// Uzycie:  <LayoutGrid />                                  12 / 8 / 4 kolumny, tylko w dev
+//          <LayoutGrid columns={16} columnsMd={8} columnsSm={4} gap="2rem" />
+//          <LayoutGrid enabled={false} />                   wylaczona calkowicie
+// Skrot:   Shift + G pokazuje / chowa siatke (stan zapamietany w przegladarce).
+
+interface Props {
+  // false = komponent nic nie renderuje. Domyslnie tylko w trybie dev
+  enabled?: boolean;
+  // liczba kolumn na desktopie
+  columns?: number;
+  // ponizej 1024px (tablet)
+  columnsMd?: number;
+  // ponizej 768px (telefon)
+  columnsSm?: number;
+  // odstep miedzy kolumnami (dowolna wartosc CSS)
+  gap?: string;
+  // kolor kolumn
+  color?: string;
+  // czy siatka jest widoczna od razu (zanim uzyjesz skrotu)
+  visible?: boolean;
+}
+
+const {
+  enabled = import.meta.env.DEV,
+  columns = 12,
+  columnsMd = 8,
+  columnsSm = 4,
+  gap = "1.6rem",
+  color = "rgba(128, 128, 128, 0.2)",
+  visible = true,
+} = Astro.props;
+
+// Renderujemy tyle blokow, ile wynosi najwieksza liczba kolumn.
+// Nadmiarowe przy mniejszej liczbie kolumn spadaja do drugiego wiersza, ktorego nie widac.
+const blockCount = Math.max(columns, columnsMd, columnsSm);
+---
+
+{
+  enabled && (
+    <layout-grid
+      class="layout_grid"
+      aria-hidden="true"
+      data-visible={visible ? "true" : "false"}
+      transition:persist
+    >
+      <div class="layout_content container">
+        {Array.from({ length: blockCount }, () => (
+          <div class="layout_block" />
+        ))}
+      </div>
+    </layout-grid>
+  )
+}
+
+<style lang="scss" define:vars={{ columns, columnsMd, columnsSm, gap, color }}>
+  .layout_grid {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+
+    &[data-visible="false"] {
+      display: none;
+    }
+  }
+
+  .layout_content {
+    display: grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
+    gap: var(--gap);
+    height: 100%;
+
+    @media (width < 1024px) {
+      grid-template-columns: repeat(var(--columnsMd), 1fr);
+    }
+
+    @media (width < 768px) {
+      grid-template-columns: repeat(var(--columnsSm), 1fr);
+    }
+  }
+
+  .layout_block {
+    height: 100vh;
+    background-color: var(--color);
+  }
+</style>
+
+<script>
+  import type { Cleanup } from "@/scripts/types";
+
+  const STORAGE_KEY = "layout-grid-visible";
+
+  function initLayoutGrid(root: HTMLElement): Cleanup {
+    // Zapamietany stan z poprzedniej wizyty (localStorage moze byc niedostepny - prywatne okno)
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved !== null) root.dataset.visible = saved;
+    } catch {}
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      // Shift + G, ale nie podczas pisania w polu formularza
+      if (!event.shiftKey || event.key.toLowerCase() !== "g") return;
+      if (event.target instanceof HTMLElement && event.target.closest("input, textarea, [contenteditable]")) return;
+
+      const next = root.dataset.visible === "true" ? "false" : "true";
+      root.dataset.visible = next;
+
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {}
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }
+
+  class LayoutGrid extends HTMLElement {
+    cleanup: Cleanup = () => {};
+
+    connectedCallback() {
+      this.cleanup = initLayoutGrid(this);
+    }
+
+    disconnectedCallback() {
+      this.cleanup();
+    }
+  }
+
+  customElements.define("layout-grid", LayoutGrid);
+</script>

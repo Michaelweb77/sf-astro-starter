@@ -1,0 +1,56 @@
+---
+import type { Settings } from "@/utils/schemas";
+
+interface Props {
+  settings: Settings;
+}
+
+const { settings } = Astro.props;
+const currentYear = new Date().getFullYear();
+
+const externalLink = {
+  target: "_blank",
+  rel: "noopener noreferrer",
+};
+---
+
+<footer class="site_footer">
+  <div class="site_footer-inner container">
+    <p>© {currentYear} {settings.name}</p>
+
+    {
+      settings.socials.length > 0 && (
+        <ul class="site_footer-socials">
+          {settings.socials.map((el) => (
+            <li>
+              <a href={el.href} aria-label={`${settings.name} na ${el.label}`} {...externalLink}>
+                {el.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</footer>
+
+<style lang="scss">
+  .site_footer {
+    margin-top: var(--space-xxl);
+    border-top: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+  }
+
+  .site_footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-l);
+  }
+
+  .site_footer-socials {
+    display: flex;
+    gap: var(--space-m);
+  }
+</style>

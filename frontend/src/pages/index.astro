@@ -1,0 +1,62 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import PostCard from "@/components/PostCard.astro";
+import { getPosts } from "@/utils/posts";
+
+const posts = await getPosts();
+---
+
+<Layout>
+  <section class="hero" aria-labelledby="home-title">
+    <div class="hero_content">
+      <h1 id="home-title" class="sr_only">
+        Wpisy
+      </h1>
+
+      {posts.length > 0 ? (
+        <ul class="home_grid">
+          {posts.map((el) => (
+            <li>
+              <PostCard post={el} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div class="home_empty">
+          <h2>Gotowe. Czas na treść.</h2>
+          <p>
+            Otwórz Studio na <a href="http://localhost:3333">localhost:3333</a>,
+            dodaj „Ustawienia strony” i pierwszy wpis, a potem w terminalu z
+            frontendem wpisz
+            <code>s</code> + Enter, żeby pobrać dane.
+          </p>
+        </div>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<style lang="scss">
+  .home {
+    padding-block: var(--space-xl);
+  }
+
+  .home_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 36rem), 1fr));
+    gap: var(--space-xl) var(--space-m);
+  }
+
+  .home_empty {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--content-max);
+  }
+
+  .home_empty code {
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.4rem;
+    background-color: var(--color-border);
+    font-family: var(--font-mono);
+  }
+</style>

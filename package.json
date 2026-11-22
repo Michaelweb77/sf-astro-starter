@@ -1,0 +1,29 @@
+{
+  "name": "astro-sanity-starter",
+  "description": "Astro (SSG + tryb podglądu z Visual Editing) i Sanity Studio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently --names frontend,studio --prefix-colors blue,magenta \"npm run dev --workspace=frontend\" \"npm run dev --workspace=studio\"",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:studio": "npm run dev --workspace=studio",
+    "build": "npm run build --workspace=frontend",
+    "deploy:studio": "npm run deploy --workspace=studio"
+  },
+  "keywords": [
+    "Sanity",
+    "Astro",
+    "Headless CMS",
+    "Visual Editing"
+  ],
+  "workspaces": [
+    "studio",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

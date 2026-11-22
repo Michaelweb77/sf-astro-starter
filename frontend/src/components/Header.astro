@@ -1,0 +1,209 @@
+---
+import type { Settings } from "@/utils/schemas";
+
+interface Props {
+  settings: Settings;
+}
+
+const { settings } = Astro.props;
+
+// Ukosnik na koncu: w dev /about, w buildzie /about/ - normalizujemy przed porownaniem
+const pathname = Astro.url.pathname;
+const currentPath =
+  pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+
+function isActive(href: string) {
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+}
+---
+
+<header class="site_header">
+  <div class="site_header-inner container-large">
+    <a href="/" class="site_header-logo">{settings.name}</a>
+
+    {
+      settings.navLinks.length > 0 && (
+        <site-menu>
+          <button
+            class="nav_toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="main-menu"
+          >
+            Menu
+          </button>
+
+          <nav
+            id="main-menu"
+            class="nav_menu"
+            data-state="closed"
+            aria-label="Główna nawigacja"
+          >
+            <ul>
+              {settings.navLinks.map((el) => (
+                <li>
+                  <a
+                    href={el.href}
+                    class:list={["nav_link", { "is-active": isActive(el.href) }]}
+                    aria-current={isActive(el.href) ? "page" : undefined}
+                  >
+                    {el.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </site-menu>
+      )
+    }
+  </div>
+</header>
+
+<style lang="scss">
+  .site_header {
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg);
+    view-transition-name: site-header;
+  }
+
+  .site_header-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-block: var(--space-m);
+  }
+
+  .site_header-logo {
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  site-menu {
+    display: contents;
+  }
+
+  .nav_toggle {
+    display: none;
+    padding: var(--space-xs) var(--space-s);
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-full);
+    background-color: transparent;
+    cursor: pointer;
+  }
+
+  ul {
+    display: flex;
+    gap: var(--space-m);
+  }
+
+  .nav_link {
+    text-decoration: none;
+    color: var(--color-text-muted);
+  }
+
+  .nav_link:hover,
+  .nav_link.is-active {
+    color: var(--color-text);
+  }
+
+  .nav_link.is-active {
+    text-decoration: underline;
+    text-underline-offset: 0.4em;
+  }
+
+  @media (width < 768px) {
+    .nav_toggle {
+      display: inline-flex;
+      position: relative;
+      z-index: 2;
+    }
+
+    .nav_menu {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      background-color: var(--color-bg);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-2rem);
+      transition:
+        opacity 0.3s,
+        transform 0.3s,
+        visibility 0.3s;
+    }
+
+    .nav_menu[data-state="open"] {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+    }
+
+    ul {
+      flex-direction: column;
+      align-items: center;
+      font-size: var(--font-size-xl);
+    }
+  }
+</style>
+
+<script>
+  import { prefetch } from "astro:prefetch";
+  import type { Cleanup } from "@/scripts/types";
+
+  function initMenu(root: HTMLElement): Cleanup {
+    const toggle = root.querySelector<HTMLButtonElement>(".nav_toggle");
+    const menu = root.querySelector<HTMLElement>(".nav_menu");
+
+    if (!toggle || !menu) return () => {};
+
+    const setOpen = (isOpen: boolean) => {
+      toggle.setAttribute("aria-expanded", String(isOpen));
+      toggle.textContent = isOpen ? "Zamknij" : "Menu";
+      menu.setAttribute("data-state", isOpen ? "open" : "closed");
+
+      // na telefonie nie ma hover - pobieramy strony z menu w chwili jego otwarcia
+      if (isOpen) {
+        menu.querySelectorAll<HTMLAnchorElement>("a").forEach((el) => prefetch(el.href));
+      }
+    };
+
+    const handleToggleClick = () => {
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    };
+
+    const handleMenuClick = (event: MouseEvent) => {
+      if (event.target instanceof Element && event.target.closest("a")) setOpen(false);
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    toggle.addEventListener("click", handleToggleClick);
+    menu.addEventListener("click", handleMenuClick);
+    document.addEventListener("keydown", handleKeydown);
+
+    // wszystko, co init podpina poza root (document), cleanup musi odpiac
+    return () => {
+      toggle.removeEventListener("click", handleToggleClick);
+      menu.removeEventListener("click", handleMenuClick);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  }
+
+  class SiteMenu extends HTMLElement {
+    cleanup: Cleanup = () => {};
+
+    connectedCallback() {
+      this.cleanup = initMenu(this);
+    }
+
+    disconnectedCallback() {
+      this.cleanup();
+    }
+  }
+
+  customElements.define("site-menu", SiteMenu);
+</script>

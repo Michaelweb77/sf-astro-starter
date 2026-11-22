@@ -1,0 +1,27 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Nie znaleziono strony" noindex>
+  <section class="not_found container" aria-labelledby="not-found-title">
+    <p class="not_found-code">404</p>
+    <h1 id="not-found-title">Tej strony tu nie ma</h1>
+    <p>Mogła zostać przeniesiona albo adres zawiera literówkę.</p>
+    <a href="/">← Strona główna</a>
+  </section>
+</Layout>
+
+<style lang="scss">
+  .not_found {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-s);
+    padding-block: var(--space-xxl);
+  }
+
+  .not_found-code {
+    font-size: var(--font-size-xxl);
+    font-weight: 700;
+    color: var(--color-accent);
+  }
+</style>

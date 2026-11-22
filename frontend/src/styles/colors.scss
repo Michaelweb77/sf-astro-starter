@@ -1,0 +1,45 @@
+// Kolory, motywy i fonty (Webflow: Variables -> Colors, Themes, Font Family)
+
+/* =========================
+   Colors - paleta
+   ========================= */
+:root {
+  --colors--transparent: transparent;
+  --colors--light: #f0f0f0;
+  --colors--dark: #171717;
+  --colors--brand: #4b7bff;
+}
+
+/* =========================
+   Themes - role kolorow
+   ========================= */
+// W komponentach uzywaj rol (--themes--text), a nie palety (--colors--dark).
+// Dzieki temu .theme-invert przelacza kolory calej sekcji jedna klasa.
+:root,
+.theme-base {
+  --themes--text: var(--colors--dark);
+  --themes--background: var(--colors--light);
+  --themes--buttons: var(--colors--brand);
+}
+
+.theme-invert {
+  --themes--text: var(--colors--light);
+  --themes--background: var(--colors--dark);
+  --themes--buttons: var(--colors--light);
+}
+
+// Klasa motywu od razu ustawia tlo i kolor tekstu swojej sekcji
+.theme-base,
+.theme-invert {
+  background-color: var(--themes--background);
+  color: var(--themes--text);
+}
+
+/* =========================
+   Font Family
+   ========================= */
+// --font-body pochodzi z Fonts API (astro.config.mjs -> fonts). Zmiana fontu = zmiana configu.
+:root {
+  --font-family--heading: var(--font-body), Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-family--body: var(--font-body), Arial, "Helvetica Neue", Helvetica, sans-serif;
+}

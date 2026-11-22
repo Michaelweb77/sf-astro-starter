@@ -1,0 +1,88 @@
+---
+import { Image } from "astro:assets";
+import type { Post } from "@/utils/schemas";
+import { sanityAttr } from "@/utils/visual-editing";
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+
+const dateFormatter = new Intl.DateTimeFormat("pl-PL", { dateStyle: "long" });
+---
+
+<article class="post_card">
+  {
+    post.mainImage && (
+      <div
+        class="post_card-media"
+        transition:name={`post-${post.slug}`}
+        data-sanity={sanityAttr(post, "mainImage")}
+      >
+        <Image
+          src={post.mainImage.src}
+          alt={post.mainImage.alt}
+          width={post.mainImage.width}
+          height={post.mainImage.height}
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+        />
+      </div>
+    )
+  }
+
+  <div class="post_card-body">
+    <time class="post_card-date" datetime={post.publishedAt.toISOString()}>
+      {dateFormatter.format(post.publishedAt)}
+    </time>
+    <h2>
+      <a href={`/post/${post.slug}`} class="post_card-link">{post.title}</a>
+    </h2>
+    {post.excerpt && <p>{post.excerpt}</p>}
+  </div>
+</article>
+
+<style lang="scss">
+  .post_card {
+    position: relative;
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .post_card-media {
+    overflow: hidden;
+    border-radius: var(--radius-m);
+  }
+
+  .post_card-media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+
+  .post_card-body {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .post_card-date {
+    font-size: var(--font-size-s);
+    color: var(--color-text-subtle);
+  }
+
+  h2 {
+    font-size: var(--font-size-l);
+  }
+
+  // klik w dowolne miejsce karty, a link zostaje tylko na tytule (czytniki ekranu)
+  .post_card-link {
+    text-decoration: none;
+
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+    }
+  }
+</style>
